@@ -1,0 +1,132 @@
+# Compiled object files
+*.o
+*.obj
+*.lo
+*.dll
+*.exe
+*.so
+*.dylib
+*.lib
+
+# Compiled source code
+*.com
+*.class
+*.jar
+*.pyc
+*.dir
+*.py.class
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+*.swp
+*~
+
+# User-specific files
+*.suo
+*.user
+*.rsuser
+*.sln.docstates
+
+# Mono auto generated files
+mono_crash.*
+
+# Visual Studio Code
+.vscode/
+
+# Rider
+.idea/
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# NUGET
+*.nupkg
+# The packages folder can be ignored because of NuGet restore
+**/packages/*
+
+# Microsoft Azure Build Output
+csx/
+*.build.csdef
+
+# Microsoft Azure Emulator
+ecf/
+rcf/
+
+# Windows Azure emulators
+csx/
+*.csdef
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# StyleCop
+StyleCopReport.xml
+
+# Files built by Visual Studio
+*.dll
+*.pdb
+*.exe
+*.crdl
+*.manifest
+*.appxsym
+*.appxupload
+*.appxsym
+*.build
+
+# VS Code directories
+.vscode/
+.history/
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# Others
+**/bin/
+**/obj/
+
+# Ignorar arquivos e diretórios gerados pelo Visual Studio
+.vs/
+**/.vs/
+.vscode/
+.vscode/**
+
+# Ignorar arquivos temporários e de índice
+store/.vs/
+store/.vs/**
+**/*.vsdx
+**/*.backup.json
+**/*.json
+**/*.db-shm
+**/*.db-wal
+**/*.db
+
+# Copilot Indices (caso esteja ativado)
+**/CopilotIndices/
+
