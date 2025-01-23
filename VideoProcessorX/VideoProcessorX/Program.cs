@@ -1,11 +1,24 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
-using VideoProcessorX.Data;
+using VideoProcessorX.Application.Services;
+using VideoProcessorX.Domain.Interfaces;
+using VideoProcessorX.Infrastructure.Persistence;
+using VideoProcessorX.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
+
+
+// Registramos o IUserRepository e a implementação concreta
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IVideoRepository, VideoRepository>();
+
+// Registramos os serviços de aplicação
+builder.Services.AddScoped<RegisterUserService>();
+builder.Services.AddScoped<LoginUserService>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -25,6 +38,7 @@ builder.Services
     {
         options.RequireHttpsMetadata = false;
         options.SaveToken = true;
+        options.MapInboundClaims = false;
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -36,10 +50,19 @@ builder.Services
             ValidAudience = audience,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
             ClockSkew = TimeSpan.Zero
+
+
         };
     });
 
 builder.Services.AddControllers();
+
+builder.Services.Configure<FormOptions>(options =>
+{
+    // Exemplo: 500 MB (em bytes)
+    options.MultipartBodyLengthLimit = 500L * 1024L * 1024L;
+});
+
 builder.Services.AddEndpointsApiExplorer();
 
 

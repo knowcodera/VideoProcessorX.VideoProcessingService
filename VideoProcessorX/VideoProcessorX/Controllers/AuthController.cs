@@ -4,10 +4,11 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using VideoProcessorX.Data;
-using VideoProcessorX.Models;
+using VideoProcessorX.Domain.Entities;
+using VideoProcessorX.Infrastructure.Persistence;
+using VideoProcessorX.WebApi.DTOs.Auth;
 
-namespace VideoProcessorX.Controllers
+namespace VideoProcessorX.WebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -90,18 +91,5 @@ namespace VideoProcessorX.Controllers
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
-    }
-
-    // DTOs (para não expor direto o modelo)
-    public class UserRegisterDto
-    {
-        public string Username { get; set; }
-        public string Email { get; set; }
-        public string Password { get; set; }
-    }
-    public class UserLoginDto
-    {
-        public string Username { get; set; }
-        public string Password { get; set; }
     }
 }

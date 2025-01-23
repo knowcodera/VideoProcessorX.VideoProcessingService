@@ -1,4 +1,4 @@
-﻿namespace VideoProcessorX.Models
+﻿namespace VideoProcessorX.Domain.Entities
 {
     public class User
     {
