@@ -1,4 +1,4 @@
-﻿namespace VideoProcessorX.Domain.Entities
+﻿namespace VideoProcessingService.Domain.Entities
 {
     public class Video
     {

@@ -1,4 +1,4 @@
-﻿namespace VideoProcessorX.WebApi.DTOs.Video
+﻿namespace VideoProcessingService.Presentation.DTOs.Video
 {
     public class VideoResponseDto
     {

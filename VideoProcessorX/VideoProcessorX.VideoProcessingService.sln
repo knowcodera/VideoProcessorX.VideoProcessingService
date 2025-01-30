@@ -3,15 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.12.35707.178
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoProcessorX.WebApi", "VideoProcessorX\VideoProcessorX.WebApi.csproj", "{1B82D5B3-0EA4-47B7-AD82-3C1D9E3B4C88}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoProcessingService.Presentation", "VideoProcessorX\VideoProcessingService.Presentation.csproj", "{1B82D5B3-0EA4-47B7-AD82-3C1D9E3B4C88}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{457F62D0-BF0C-4AFD-807B-F551C9883EDE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoProcessorX.Domain", "VideoProcessorX.Domain\VideoProcessorX.Domain.csproj", "{56B82D30-1E8C-400B-B704-64B034AD5B51}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoProcessingService.Domain", "VideoProcessorX.Domain\VideoProcessingService.Domain.csproj", "{56B82D30-1E8C-400B-B704-64B034AD5B51}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoProcessorX.Application", "VideoProcessorX.Application\VideoProcessorX.Application.csproj", "{AFEF057C-7059-42A3-AFA3-9E01B35E43C3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoProcessingService.Application", "VideoProcessorX.Application\VideoProcessingService.Application.csproj", "{AFEF057C-7059-42A3-AFA3-9E01B35E43C3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoProcessorX.Infrastructure", "VideoProcessorX.Infrastructure\VideoProcessorX.Infrastructure.csproj", "{356DC692-A049-4258-8E28-E84632D0FEA2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoProcessingService.Infrastructure", "VideoProcessorX.Infrastructure\VideoProcessingService.Infrastructure.csproj", "{356DC692-A049-4258-8E28-E84632D0FEA2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{2D332B38-9539-4C46-B182-3AA333AF215E}"
 EndProject

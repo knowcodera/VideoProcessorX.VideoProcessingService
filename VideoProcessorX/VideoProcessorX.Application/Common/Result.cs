@@ -1,4 +1,4 @@
-﻿namespace VideoProcessorX.Application.Common
+﻿namespace VideoProcessingService.Application.Common
 {
     public class Result
     {

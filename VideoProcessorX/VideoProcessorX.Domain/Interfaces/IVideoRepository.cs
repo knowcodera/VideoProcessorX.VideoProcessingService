@@ -1,11 +1,10 @@
-﻿using VideoProcessorX.Domain.Entities;
+﻿using VideoProcessingService.Domain.Entities;
 
-namespace VideoProcessorX.Domain.Interfaces
+namespace VideoProcessingService.Domain.Interfaces
 {
     public interface IVideoRepository
     {
         Task<Video> GetByIdAsync(int videoId);
-        Task<List<Video>> GetByUserIdAsync(int userId);
         Task CreateAsync(Video video);
         Task UpdateAsync(Video video);
     }

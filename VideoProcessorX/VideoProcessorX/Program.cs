@@ -4,21 +4,24 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
-using VideoProcessorX.Application.Services;
-using VideoProcessorX.Domain.Interfaces;
-using VideoProcessorX.Infrastructure.Persistence;
-using VideoProcessorX.Infrastructure.Repositories;
+using VideoProcessingService.Application.Interfaces;
+using VideoProcessingService.Application.Services;
+using VideoProcessingService.Domain.Interfaces;
+using VideoProcessingService.Infrastructure.Data;
+using VideoProcessingService.Infrastructure.Messaging;
+using VideoProcessingService.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddSingleton<RabbitMqListener>();
+builder.Services.AddHostedService<RabbitMqHostedService>();
 
-// Registramos o IUserRepository e a implementação concreta
-builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddSingleton<IMessageQueue>(sp =>
+    new RabbitMqMessageQueue("localhost"));
+
 builder.Services.AddScoped<IVideoRepository, VideoRepository>();
-
-// Registramos os serviços de aplicação
-builder.Services.AddScoped<RegisterUserService>();
-builder.Services.AddScoped<LoginUserService>();
+builder.Services.AddScoped<IVideoProcessor, VideoProcessor>();
+builder.Services.AddScoped<IVideoService, VideoService>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -50,7 +53,6 @@ builder.Services
             ValidAudience = audience,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
             ClockSkew = TimeSpan.Zero
-
 
         };
     });
@@ -95,6 +97,7 @@ builder.Services.AddSwaggerGen(c =>
         },
         Array.Empty<string>()
     }});
+
 });
 
 var app = builder.Build();

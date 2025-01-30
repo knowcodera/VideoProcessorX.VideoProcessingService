@@ -13,10 +13,13 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="RabbitMQ.Client" Version="6.6.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\VideoProcessorX.Domain\VideoProcessorX.Domain.csproj" />
+    <ProjectReference Include="..\VideoProcessorX.Application\VideoProcessingService.Application.csproj" />
+    <ProjectReference Include="..\VideoProcessorX.Domain\VideoProcessingService.Domain.csproj" />
   </ItemGroup>
 
 </Project>

@@ -29,14 +29,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Controllers\" />
     <Folder Include="Domain\" />
     <Folder Include="Application\" />
+    <Folder Include="Services\" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\VideoProcessorX.Application\VideoProcessorX.Application.csproj" />
-    <ProjectReference Include="..\VideoProcessorX.Domain\VideoProcessorX.Domain.csproj" />
-    <ProjectReference Include="..\VideoProcessorX\VideoProcessorX.WebApi.csproj" />
+    <ProjectReference Include="..\VideoProcessorX.Application\VideoProcessingService.Application.csproj" />
+    <ProjectReference Include="..\VideoProcessorX.Domain\VideoProcessingService.Domain.csproj" />
+    <ProjectReference Include="..\VideoProcessorX\VideoProcessingService.Presentation.csproj" />
   </ItemGroup>
 
 </Project>

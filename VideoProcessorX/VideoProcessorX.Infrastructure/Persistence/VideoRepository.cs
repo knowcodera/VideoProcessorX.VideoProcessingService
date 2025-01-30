@@ -1,9 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
-using VideoProcessorX.Domain.Entities;
-using VideoProcessorX.Domain.Interfaces;
-using VideoProcessorX.Infrastructure.Persistence;
+﻿using VideoProcessingService.Domain.Entities;
+using VideoProcessingService.Domain.Interfaces;
+using VideoProcessingService.Infrastructure.Data;
 
-namespace VideoProcessorX.Infrastructure.Repositories
+namespace VideoProcessingService.Infrastructure.Persistence
 {
     public class VideoRepository : IVideoRepository
     {
@@ -17,14 +16,6 @@ namespace VideoProcessorX.Infrastructure.Repositories
         public async Task<Video> GetByIdAsync(int videoId)
         {
             return await _context.Videos.FindAsync(videoId);
-        }
-
-        public async Task<List<Video>> GetByUserIdAsync(int userId)
-        {
-            return await _context.Videos
-                .Where(v => v.UserId == userId)
-                .OrderByDescending(v => v.CreatedAt)
-                .ToListAsync();
         }
 
         public async Task CreateAsync(Video video)
