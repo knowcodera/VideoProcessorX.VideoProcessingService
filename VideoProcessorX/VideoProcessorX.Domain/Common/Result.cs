@@ -1,4 +1,4 @@
-﻿namespace VideoProcessingService.Application.Common
+﻿namespace VideoProcessingService.Domain.Common
 {
     public class Result
     {

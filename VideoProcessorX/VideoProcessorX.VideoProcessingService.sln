@@ -17,6 +17,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{2D332B38
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoProcessorX.UnitTests", "VideoProcessorX.UnitTests\VideoProcessorX.UnitTests.csproj", "{6D91EBA4-843B-457A-BEBC-ECFA7C33A0BC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoProcessorX.IntegrationTests", "VideoProcessorX.IntegrationTests\VideoProcessorX.IntegrationTests.csproj", "{CCE0B693-8631-4D7B-9637-03AA074D9E5A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +45,10 @@ Global
 		{6D91EBA4-843B-457A-BEBC-ECFA7C33A0BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6D91EBA4-843B-457A-BEBC-ECFA7C33A0BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6D91EBA4-843B-457A-BEBC-ECFA7C33A0BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CCE0B693-8631-4D7B-9637-03AA074D9E5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CCE0B693-8631-4D7B-9637-03AA074D9E5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CCE0B693-8631-4D7B-9637-03AA074D9E5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CCE0B693-8631-4D7B-9637-03AA074D9E5A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -53,5 +59,6 @@ Global
 		{AFEF057C-7059-42A3-AFA3-9E01B35E43C3} = {457F62D0-BF0C-4AFD-807B-F551C9883EDE}
 		{356DC692-A049-4258-8E28-E84632D0FEA2} = {457F62D0-BF0C-4AFD-807B-F551C9883EDE}
 		{6D91EBA4-843B-457A-BEBC-ECFA7C33A0BC} = {2D332B38-9539-4C46-B182-3AA333AF215E}
+		{CCE0B693-8631-4D7B-9637-03AA074D9E5A} = {2D332B38-9539-4C46-B182-3AA333AF215E}
 	EndGlobalSection
 EndGlobal

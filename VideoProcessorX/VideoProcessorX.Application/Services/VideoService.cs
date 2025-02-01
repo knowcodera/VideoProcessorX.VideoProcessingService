@@ -1,14 +1,10 @@
 ﻿using FFMpegCore;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using VideoProcessingService.Application.Common;
 using VideoProcessingService.Application.Interfaces;
-using VideoProcessingService.Domain.Entities;
-using VideoProcessingService.Domain.Interfaces;
 
 namespace VideoProcessingService.Application.Services
 {
-   public class VideoService : IVideoService
+    public class VideoService : IVideoService
 {
     private readonly IWebHostEnvironment _environment;
 
