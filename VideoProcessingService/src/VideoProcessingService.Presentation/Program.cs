@@ -16,9 +16,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<RabbitMqListener>();
 builder.Services.AddHostedService<RabbitMqHostedService>();
 builder.Services.AddHostedService<VideoProcessingWorker>();
-
-//builder.Services.AddSingleton<IMessageQueue>(sp =>
-//    new RabbitMqMessageQueue("localhost"));
+builder.Services.AddHostedService<UserEventsConsumer>();
 
 builder.Services.AddSingleton<IMessageQueue>(sp =>
     new RabbitMqMessageQueue("rabbitmq"));
@@ -105,14 +103,17 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+using (var scope = app.Services.CreateScope())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "VideoProcessorX v1");
-    });
+    var worker = scope.ServiceProvider.GetRequiredService<VideoProcessingWorker>();
 }
+
+
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "VideoProcessorX v1");
+});
 
 app.UseHttpsRedirection();
 

@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\VideoProcessorX.Infrastructure\VideoProcessingService.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\VideoProcessingService.Infrastructure\VideoProcessingService.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>

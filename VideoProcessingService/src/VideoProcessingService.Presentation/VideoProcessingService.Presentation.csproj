@@ -20,9 +20,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\VideoProcessorX.Application\VideoProcessingService.Application.csproj" />
-    <ProjectReference Include="..\VideoProcessorX.Domain\VideoProcessingService.Domain.csproj" />
-    <ProjectReference Include="..\VideoProcessorX.Infrastructure\VideoProcessingService.Infrastructure.csproj" />
+    <ProjectReference Include="..\VideoProcessingService.Application\VideoProcessingService.Application.csproj" />
+    <ProjectReference Include="..\VideoProcessingService.Domain\VideoProcessingService.Domain.csproj" />
+    <ProjectReference Include="..\VideoProcessingService.Infrastructure\VideoProcessingService.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

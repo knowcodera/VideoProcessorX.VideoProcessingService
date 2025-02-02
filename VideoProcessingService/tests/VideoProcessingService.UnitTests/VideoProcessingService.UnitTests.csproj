@@ -37,9 +37,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\VideoProcessorX.Application\VideoProcessingService.Application.csproj" />
-    <ProjectReference Include="..\VideoProcessorX.Domain\VideoProcessingService.Domain.csproj" />
-    <ProjectReference Include="..\VideoProcessorX\VideoProcessingService.Presentation.csproj" />
+    <ProjectReference Include="..\..\src\VideoProcessingService.Application\VideoProcessingService.Application.csproj" />
+    <ProjectReference Include="..\..\src\VideoProcessingService.Domain\VideoProcessingService.Domain.csproj" />
+    <ProjectReference Include="..\..\src\VideoProcessingService.Presentation\VideoProcessingService.Presentation.csproj" />
   </ItemGroup>
 
 </Project>

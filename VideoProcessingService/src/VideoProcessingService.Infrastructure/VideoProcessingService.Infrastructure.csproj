@@ -18,8 +18,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\VideoProcessorX.Application\VideoProcessingService.Application.csproj" />
-    <ProjectReference Include="..\VideoProcessorX.Domain\VideoProcessingService.Domain.csproj" />
+    <ProjectReference Include="..\VideoProcessingService.Application\VideoProcessingService.Application.csproj" />
+    <ProjectReference Include="..\VideoProcessingService.Domain\VideoProcessingService.Domain.csproj" />
   </ItemGroup>
 
 </Project>
