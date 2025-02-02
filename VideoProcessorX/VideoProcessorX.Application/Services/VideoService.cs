@@ -20,7 +20,7 @@ namespace VideoProcessingService.Application.Services
             _logger = logger;
 
             // Configuração do FFmpeg
-            FFmpeg.SetExecutablesPath(Path.Combine(_environment.ContentRootPath, "ffmpeg"));
+            FFmpeg.SetExecutablesPath(_environment.ContentRootPath);
         }
 
         public async Task<string> GenerateFramesZipAsync(string videoPath, int videoId)

@@ -16,6 +16,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSingleton<RabbitMqListener>();
 builder.Services.AddHostedService<RabbitMqHostedService>();
+builder.Services.AddHostedService<VideoProcessingWorker>();
 
 builder.Services.AddSingleton<IMessageQueue>(sp =>
     new RabbitMqMessageQueue("localhost"));
@@ -23,14 +24,6 @@ builder.Services.AddSingleton<IMessageQueue>(sp =>
 builder.Services.AddScoped<IVideoRepository, VideoRepository>();
 builder.Services.AddScoped<IVideoProcessor, VideoProcessor>();
 builder.Services.AddScoped<IVideoService, VideoService>();
-
-
-// Adicionar no ConfigureServices
-builder.Services.AddHostedService<VideoProcessingWorker>();
-
-// Adicionar configuração do RabbitMQ
-//builder.Services.Configure<RabbitMQSettings>(builder.Configuration.GetSection("RabbitMQ"));
-
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));

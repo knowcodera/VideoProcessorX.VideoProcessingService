@@ -86,8 +86,10 @@ namespace VideoProcessingService.Infrastructure.Messaging
             consumer.Received += async (model, ea) =>
             {
                 using var scope = _scopeFactory.CreateScope();
-                var videoService = scope.ServiceProvider.GetRequiredService<IVideoService>();
                 var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                var messageQueue = scope.ServiceProvider.GetRequiredService<IMessageQueue>();
+                var videoService = scope.ServiceProvider.GetRequiredService<IVideoService>();
+                var logger = scope.ServiceProvider.GetRequiredService<ILogger<VideoProcessingWorker>>();
 
                 try
                 {
