@@ -31,6 +31,20 @@ namespace VideoProcessorX.UnitTests
             Assert.Equal("COMPLETED", video.Status);
             _videoRepositoryMock.Verify(repo => repo.UpdateAsync(video), Times.Once);
         }
+
+        [Fact]
+        public async Task ProcessVideoAsync_Should_Return_Failure_When_VideoNotFound()
+        {
+            // Arrange
+            _videoRepositoryMock.Setup(repo => repo.GetByIdAsync(It.IsAny<int>())).ReturnsAsync((Video)null);
+
+            // Act
+            var result = await _videoProcessor.ProcessVideoAsync(1);
+
+            // Assert
+            Assert.False(result.Succeeded);
+            Assert.Equal("Vídeo não encontrado.", result.Error);
+        }
     }
 
 }

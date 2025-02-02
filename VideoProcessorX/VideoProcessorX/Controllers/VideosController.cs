@@ -13,24 +13,28 @@ namespace VideoProcessorX.WebApi.Controllers
     public class VideosController : ControllerBase
     {
         private readonly AppDbContext _context;
-        private readonly IWebHostEnvironment _env; // para obter caminhos locais
+        private readonly IWebHostEnvironment _env;
         private readonly IVideoService _videoService;
+        private readonly IMessageQueue _messageQueue; // Novo campo
 
-        public VideosController(AppDbContext context, IWebHostEnvironment env, IVideoService videoService)
+        public VideosController(
+            AppDbContext context,
+            IWebHostEnvironment env,
+            IVideoService videoService,
+            IMessageQueue messageQueue) // Injeção do IMessageQueue
         {
             _context = context;
             _env = env;
             _videoService = videoService;
+            _messageQueue = messageQueue;
         }
 
         [HttpGet]
-        [Authorize]  // exije JWT no header Authorization
+        [Authorize]
         public async Task<IActionResult> GetUserVideos()
         {
-            // Identifica o ID do usuário logado pelos claims do JWT
             var userId = int.Parse(User.Claims.First(c => c.Type == "sub").Value);
 
-            // Consulta o BD, filtrando pelos vídeos do usuário
             var videos = await _context.Videos
                 .Where(v => v.UserId == userId)
                 .OrderByDescending(v => v.CreatedAt)
@@ -45,19 +49,16 @@ namespace VideoProcessorX.WebApi.Controllers
                 })
                 .ToListAsync();
 
-            // Retorna em formato JSON
             return Ok(videos);
         }
 
-
         [HttpPost("upload")]
         [Authorize]
-        [RequestSizeLimit(500_000_000)] // 500 MB
+        [RequestSizeLimit(500_000_000)]
         [RequestFormLimits(MultipartBodyLengthLimit = 500_000_000)]
         public async Task<IActionResult> UploadVideo([FromForm] VideoUploadDto dto)
         {
             var userId = int.Parse(User.Claims.First(c => c.Type == "sub").Value);
-
 
             if (dto.File == null || dto.File.Length == 0)
                 return BadRequest("Nenhum arquivo enviado.");
@@ -66,14 +67,12 @@ namespace VideoProcessorX.WebApi.Controllers
             if (!Directory.Exists(uploadsFolder))
                 Directory.CreateDirectory(uploadsFolder);
 
-
             var uniqueFileName = $"{Guid.NewGuid()}_{dto.File.FileName}";
             var fullPath = Path.Combine(uploadsFolder, uniqueFileName);
 
-
             try
             {
-                using (var stream = new FileStream(fullPath, FileMode.Create, FileAccess.Write))
+                using (var stream = new FileStream(fullPath, FileMode.Create))
                 {
                     await dto.File.CopyToAsync(stream);
                 }
@@ -96,43 +95,30 @@ namespace VideoProcessorX.WebApi.Controllers
             _context.Videos.Add(video);
             await _context.SaveChangesAsync();
 
-
             try
             {
+                // Enfileira o processamento
+                await _messageQueue.PublishAsync("video.process", new
+                {
+                    VideoId = video.Id
+                });
 
-                video.Status = "PROCESSING";
-                _context.Videos.Update(video);
-                await _context.SaveChangesAsync();
-
-
-                var zipPath = await _videoService.GenerateFramesZipAsync(video.FilePath, video.Id);
-
-
-                video.ZipPath = zipPath;
-                video.Status = "COMPLETED";
-                video.ProcessedAt = DateTime.UtcNow;
-
-                _context.Videos.Update(video);
-                await _context.SaveChangesAsync();
+                return Ok(new
+                {
+                    message = "Upload concluído. Processamento em segundo plano.",
+                    videoId = video.Id,
+                    status = video.Status
+                });
             }
             catch (Exception ex)
             {
-
+                // Em caso de erro no enfileiramento
                 video.Status = "ERROR";
                 _context.Videos.Update(video);
                 await _context.SaveChangesAsync();
 
-                return StatusCode(500, $"Erro ao processar o vídeo: {ex.Message}");
+                return StatusCode(500, $"Erro ao enfileirar o processamento: {ex.Message}");
             }
-
-            return Ok(new
-            {
-                message = "Upload e processamento concluídos",
-                videoId = video.Id,
-                status = video.Status
-            });
         }
-
-
     }
 }

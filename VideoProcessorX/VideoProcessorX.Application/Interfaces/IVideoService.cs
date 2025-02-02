@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using VideoProcessingService.Application.Common;
-
-namespace VideoProcessingService.Application.Interfaces
+﻿namespace VideoProcessingService.Application.Interfaces
 {
     public interface IVideoService
     {

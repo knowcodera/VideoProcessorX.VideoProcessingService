@@ -7,6 +7,7 @@ using System.Text;
 using VideoProcessingService.Application.Interfaces;
 using VideoProcessingService.Application.Services;
 using VideoProcessingService.Domain.Interfaces;
+using VideoProcessingService.Domain.Services;
 using VideoProcessingService.Infrastructure.Data;
 using VideoProcessingService.Infrastructure.Messaging;
 using VideoProcessingService.Infrastructure.Persistence;
@@ -22,6 +23,14 @@ builder.Services.AddSingleton<IMessageQueue>(sp =>
 builder.Services.AddScoped<IVideoRepository, VideoRepository>();
 builder.Services.AddScoped<IVideoProcessor, VideoProcessor>();
 builder.Services.AddScoped<IVideoService, VideoService>();
+
+
+// Adicionar no ConfigureServices
+builder.Services.AddHostedService<VideoProcessingWorker>();
+
+// Adicionar configuração do RabbitMQ
+//builder.Services.Configure<RabbitMQSettings>(builder.Configuration.GetSection("RabbitMQ"));
+
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
