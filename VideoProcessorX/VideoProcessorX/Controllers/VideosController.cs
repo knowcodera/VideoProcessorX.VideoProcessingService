@@ -97,7 +97,6 @@ namespace VideoProcessorX.WebApi.Controllers
 
             try
             {
-                // Enfileira o processamento
                 await _messageQueue.PublishAsync("video.process", new
                 {
                     VideoId = video.Id
@@ -112,13 +111,27 @@ namespace VideoProcessorX.WebApi.Controllers
             }
             catch (Exception ex)
             {
-                // Em caso de erro no enfileiramento
                 video.Status = "ERROR";
                 _context.Videos.Update(video);
                 await _context.SaveChangesAsync();
 
                 return StatusCode(500, $"Erro ao enfileirar o processamento: {ex.Message}");
             }
+        }
+
+        [HttpGet("download/{videoId}")]
+        [Authorize]
+        public async Task<IActionResult> DownloadZip(int videoId)
+        {
+            var video = await _context.Videos.FindAsync(videoId);
+            if (video == null || video.Status != "COMPLETED")
+                return NotFound("Arquivo não encontrado ou não processado");
+
+            if (!System.IO.File.Exists(video.ZipPath))
+                return NotFound("Arquivo ZIP não encontrado");
+
+            var fileStream = new FileStream(video.ZipPath, FileMode.Open, FileAccess.Read);
+            return File(fileStream, "application/zip", $"{Path.GetFileNameWithoutExtension(video.OriginalFileName)}_frames.zip");
         }
     }
 }

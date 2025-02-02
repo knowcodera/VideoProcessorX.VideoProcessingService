@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -98,34 +99,61 @@ namespace VideoProcessingService.Infrastructure.Messaging
 
                     _logger.LogInformation($"Iniciando processamento do vídeo {message.VideoId} (DeliveryTag: {ea.DeliveryTag})");
 
-                    var video = await dbContext.Videos.FindAsync(message.VideoId);
+                    var video = await dbContext.Videos
+                                   .Include(v => v.User)
+                                   .FirstOrDefaultAsync(v => v.Id == message.VideoId);
+
+                    if (video?.User == null)
+                    {
+                        _logger.LogWarning($"Usuário não encontrado para o vídeo {message.VideoId}");
+                        return;
+                    }
+
+                    await _messageQueue.PublishAsync("notification.events", new
+                    {
+                        Email = video.User.Email,
+                        Subject = "Seu vídeo foi processado",
+                        Body = $"Download disponível em: http://web:8080/api/videos/download/{video.Id}"
+                    });
+
                     if (video == null || video.Status != "PENDING")
                     {
                         _channel.BasicAck(ea.DeliveryTag, false);
                         return;
                     }
 
-                    // Atualiza status para PROCESSING
                     video.Status = "PROCESSING";
                     await dbContext.SaveChangesAsync();
-
-                    // Processamento principal
+                   
                     var zipPath = await videoService.GenerateFramesZipAsync(video.FilePath, video.Id);
 
-                    // Atualiza status para COMPLETED
                     video.ZipPath = zipPath;
                     video.Status = "COMPLETED";
                     video.ProcessedAt = DateTime.UtcNow;
                     await dbContext.SaveChangesAsync();
 
+                    var user = await dbContext.Users.FindAsync(video.UserId);
+                    if (user == null)
+                    {
+                        logger.LogWarning($"Usuário não encontrado para o vídeo {video.Id}");
+                        return;
+                    }
+
+                    await messageQueue.PublishAsync("notification.events", new
+                    {
+                        Email = user.Email,
+                        Subject = "Seu vídeo foi processado com sucesso",
+                        Body = $"Seu vídeo {video.OriginalFileName} está pronto! " +
+                     $"Download do arquivo ZIP: http://web:8080/api/videos/download/{video.Id}"
+                    });
+
                     _channel.BasicAck(ea.DeliveryTag, false);
-                    _logger.LogInformation($"Vídeo {message.VideoId} processado com sucesso");
+                    //_logger.LogInformation($"Vídeo {message.VideoId} processado com sucesso");
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, $"Erro ao processar vídeo (DeliveryTag: {ea.DeliveryTag})");
 
-                    // Rejeita a mensagem sem reenfileirar (vai para DLQ após 3 tentativas)
                     _channel.BasicNack(ea.DeliveryTag, false, false);
                 }
             };
@@ -139,6 +167,7 @@ namespace VideoProcessingService.Infrastructure.Messaging
 
             return Task.CompletedTask;
         }
+
 
         public override async Task StopAsync(CancellationToken cancellationToken)
         {

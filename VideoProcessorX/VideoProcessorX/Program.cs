@@ -7,7 +7,6 @@ using System.Text;
 using VideoProcessingService.Application.Interfaces;
 using VideoProcessingService.Application.Services;
 using VideoProcessingService.Domain.Interfaces;
-using VideoProcessingService.Domain.Services;
 using VideoProcessingService.Infrastructure.Data;
 using VideoProcessingService.Infrastructure.Messaging;
 using VideoProcessingService.Infrastructure.Persistence;
@@ -18,11 +17,13 @@ builder.Services.AddSingleton<RabbitMqListener>();
 builder.Services.AddHostedService<RabbitMqHostedService>();
 builder.Services.AddHostedService<VideoProcessingWorker>();
 
+//builder.Services.AddSingleton<IMessageQueue>(sp =>
+//    new RabbitMqMessageQueue("localhost"));
+
 builder.Services.AddSingleton<IMessageQueue>(sp =>
-    new RabbitMqMessageQueue("localhost"));
+    new RabbitMqMessageQueue("rabbitmq"));
 
 builder.Services.AddScoped<IVideoRepository, VideoRepository>();
-builder.Services.AddScoped<IVideoProcessor, VideoProcessor>();
 builder.Services.AddScoped<IVideoService, VideoService>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
