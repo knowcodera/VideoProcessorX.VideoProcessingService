@@ -1,29 +1,25 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Text;
 using System.Text.Json;
 using VideoProcessingService.Application.Interfaces;
 using VideoProcessingService.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 
 namespace VideoProcessingService.Infrastructure.Messaging
 {
     public class VideoProcessingWorker : BackgroundService
     {
+        private IModel _channel;
         private readonly ILogger<VideoProcessingWorker> _logger;
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly IConfiguration _configuration;
         private IConnection _connection;
-        private IModel _channel;
+      
 
         // Configurações RabbitMQ
         private const string MainExchange = "video_exchange";
@@ -64,7 +60,6 @@ namespace VideoProcessingService.Infrastructure.Messaging
             var factory = new ConnectionFactory()
             {
                 HostName = _configuration["RabbitMQ:HostName"],
-                Port = _configuration.GetValue<int>("RabbitMQ:Port", 5672),
                 UserName = _configuration["RabbitMQ:UserName"],
                 Password = _configuration["RabbitMQ:Password"],
                 DispatchConsumersAsync = true,

@@ -18,11 +18,12 @@ builder.Services.AddHostedService<RabbitMqHostedService>();
 builder.Services.AddHostedService<VideoProcessingWorker>();
 builder.Services.AddHostedService<UserEventsConsumer>();
 
-builder.Services.AddSingleton<IMessageQueue>(sp =>
-    new RabbitMqMessageQueue("rabbitmq"));
-
 builder.Services.AddScoped<IVideoRepository, VideoRepository>();
 builder.Services.AddScoped<IVideoService, VideoService>();
+
+
+//builder.Services.AddRabbitMq(builder.Configuration);
+
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -103,10 +104,10 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
-{
-    var worker = scope.ServiceProvider.GetRequiredService<VideoProcessingWorker>();
-}
+//using (var scope = app.Services.CreateScope())
+//{
+//    var worker = scope.ServiceProvider.GetRequiredService<VideoProcessingWorker>();
+//}
 
 
 app.UseSwagger();
@@ -122,4 +123,11 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
+if (app.Environment.IsDevelopment())
+{
+    app.Run();
+}
+else
+{
+    app.Run("http://*:7070");
+}

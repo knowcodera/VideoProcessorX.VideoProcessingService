@@ -1,0 +1,23 @@
+version: '3.9'
+
+services:
+  video-processor-service:
+    build:
+      context: ./VideoProcessingService
+      dockerfile: Dockerfile
+    container_name: video-processor-service
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=VideoDB;User Id=sa;Password=StrongPassword123;
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__Username=guest
+      - RabbitMQ__Password=guest
+      - ASPNETCORE_URLS=http://*:7070
+    networks:
+      - backend
+    ports:
+      - "7071:7070"
+
+networks:
+  backend:
+    external: true

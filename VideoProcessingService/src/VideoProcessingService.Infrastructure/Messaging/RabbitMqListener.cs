@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -11,6 +12,7 @@ namespace VideoProcessingService.Infrastructure.Messaging
     {
         private readonly ILogger<RabbitMqListener> _logger;
         private readonly IServiceScopeFactory _scopeFactory;
+        private readonly IConfiguration _configuration;
 
         private IConnection _connection;
         private IModel _channel;
@@ -20,19 +22,27 @@ namespace VideoProcessingService.Infrastructure.Messaging
 
         public RabbitMqListener(
             ILogger<RabbitMqListener> logger,
-            IServiceScopeFactory scopeFactory)
+            IServiceScopeFactory scopeFactory,
+            IConfiguration configuration)
         {
             _logger = logger;
             _scopeFactory = scopeFactory;
+            _configuration = configuration;
         }
 
         public void Start()
         {
             try
             {
-                var factory = new ConnectionFactory
+                var factory = new ConnectionFactory()
                 {
-                    HostName = "localhost"
+                    HostName = _configuration["RabbitMQ:HostName"],
+                    UserName = _configuration["RabbitMQ:UserName"],
+                    Password = _configuration["RabbitMQ:Password"],
+                    DispatchConsumersAsync = true,
+                    AutomaticRecoveryEnabled = true,
+                    NetworkRecoveryInterval = TimeSpan.FromSeconds(10),
+                    RequestedConnectionTimeout = TimeSpan.FromSeconds(15)
                 };
 
                 _connection = factory.CreateConnection();

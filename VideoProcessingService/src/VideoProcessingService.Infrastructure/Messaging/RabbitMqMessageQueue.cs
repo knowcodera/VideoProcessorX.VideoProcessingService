@@ -1,4 +1,5 @@
-﻿using RabbitMQ.Client;
+﻿using Microsoft.Extensions.Configuration;
+using RabbitMQ.Client;
 using System.Text;
 using System.Text.Json;
 using VideoProcessingService.Application.Interfaces;
@@ -7,22 +8,25 @@ namespace VideoProcessingService.Infrastructure.Messaging
 {
     public class RabbitMqMessageQueue : IMessageQueue
     {
-        private readonly string _hostName;
-        private readonly int _port;
+   
+        private readonly IConfiguration _configuration;
 
-        public RabbitMqMessageQueue(string hostName, int port = 5672)
+        public RabbitMqMessageQueue(IConfiguration configuration)
         {
-            _hostName = hostName;
-            _port = port;
+            _configuration = configuration;
         }
 
         public async Task PublishAsync(string queueName, object message)
         {
             var factory = new ConnectionFactory()
             {
-                HostName = _hostName,
-                Port = _port,
-                DispatchConsumersAsync = true
+                HostName = _configuration["RabbitMQ:HostName"],
+                UserName = _configuration["RabbitMQ:UserName"],
+                Password = _configuration["RabbitMQ:Password"],
+                DispatchConsumersAsync = true,
+                AutomaticRecoveryEnabled = true,
+                NetworkRecoveryInterval = TimeSpan.FromSeconds(10),
+                RequestedConnectionTimeout = TimeSpan.FromSeconds(15)
             };
 
             using var connection = factory.CreateConnection();
