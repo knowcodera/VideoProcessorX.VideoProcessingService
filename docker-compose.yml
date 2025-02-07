@@ -5,7 +5,7 @@ services:
     build:
       context: ./VideoProcessingService
       dockerfile: Dockerfile
-    container_name: video-processor-service
+    container_name: video-processing-service
     environment:
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=VideoDB;User Id=sa;Password=StrongPassword123;
       - RabbitMQ__HostName=rabbitmq

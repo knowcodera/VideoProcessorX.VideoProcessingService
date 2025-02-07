@@ -8,22 +8,19 @@ using VideoProcessingService.Application.Interfaces;
 using VideoProcessingService.Application.Services;
 using VideoProcessingService.Domain.Interfaces;
 using VideoProcessingService.Infrastructure.Data;
+using VideoProcessingService.Infrastructure.Extensions;
 using VideoProcessingService.Infrastructure.Messaging;
 using VideoProcessingService.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddSingleton<RabbitMqListener>();
-builder.Services.AddHostedService<RabbitMqHostedService>();
-builder.Services.AddHostedService<VideoProcessingWorker>();
-builder.Services.AddHostedService<UserEventsConsumer>();
+builder.Services.AddRabbitMq(builder.Configuration);
 
 builder.Services.AddScoped<IVideoRepository, VideoRepository>();
 builder.Services.AddScoped<IVideoService, VideoService>();
 
-
-//builder.Services.AddRabbitMq(builder.Configuration);
-
+builder.Services.AddHostedService<VideoProcessingWorker>();
+builder.Services.AddHostedService<UserEventsConsumer>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -74,7 +71,7 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "VideoProcessorX API",
+        Title = "VideoProcessing Service",
         Version = "v1"
     });
 
@@ -103,12 +100,6 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
-
-//using (var scope = app.Services.CreateScope())
-//{
-//    var worker = scope.ServiceProvider.GetRequiredService<VideoProcessingWorker>();
-//}
-
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>

@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using System.Text;
 using System.Text.Json;
@@ -8,37 +8,39 @@ namespace VideoProcessingService.Infrastructure.Messaging
 {
     public class RabbitMqMessageQueue : IMessageQueue
     {
-   
-        private readonly IConfiguration _configuration;
+        private readonly IModel _channel;
+        private readonly ILogger<RabbitMqMessageQueue> _logger;
 
-        public RabbitMqMessageQueue(IConfiguration configuration)
+        public RabbitMqMessageQueue(
+            IModel channel,
+            ILogger<RabbitMqMessageQueue> logger)
         {
-            _configuration = configuration;
+            _channel = channel;
+            _logger = logger;
         }
 
         public async Task PublishAsync(string queueName, object message)
         {
-            var factory = new ConnectionFactory()
+            try
             {
-                HostName = _configuration["RabbitMQ:HostName"],
-                UserName = _configuration["RabbitMQ:UserName"],
-                Password = _configuration["RabbitMQ:Password"],
-                DispatchConsumersAsync = true,
-                AutomaticRecoveryEnabled = true,
-                NetworkRecoveryInterval = TimeSpan.FromSeconds(10),
-                RequestedConnectionTimeout = TimeSpan.FromSeconds(15)
-            };
+                var body = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(message));
+                var properties = _channel.CreateBasicProperties();
+                properties.Persistent = true;
 
-            using var connection = factory.CreateConnection();
-            using var channel = connection.CreateModel();
+                _channel.BasicPublish(
+                    exchange: "",
+                    routingKey: queueName,
+                    basicProperties: properties,
+                    body: body);
 
-            channel.BasicPublish(
-               exchange: "video_exchange",
-               routingKey: queueName,
-               basicProperties: null,
-               body: Encoding.UTF8.GetBytes(JsonSerializer.Serialize(message)));
-
-            await Task.CompletedTask;
+                _logger.LogDebug("Published message to {QueueName}", queueName);
+                await Task.CompletedTask;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error publishing message to {QueueName}", queueName);
+                throw;
+            }
         }
     }
 }

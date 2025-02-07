@@ -1,115 +1,89 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
-using VideoProcessingService.Infrastructure.Data;
 
 namespace VideoProcessingService.Infrastructure.Messaging
 {
-    public class RabbitMqListener
+    public class RabbitMqListener : BackgroundService
     {
+        private readonly IModel _channel;
         private readonly ILogger<RabbitMqListener> _logger;
         private readonly IServiceScopeFactory _scopeFactory;
-        private readonly IConfiguration _configuration;
-
-        private IConnection _connection;
-        private IModel _channel;
-        private EventingBasicConsumer _consumer;
-
-        private readonly string _queueName = "video.uploaded";
+        private readonly string _queueName;
+        private readonly string _exchangeName;
+        private readonly string _routingKey;
 
         public RabbitMqListener(
+            IModel channel,
             ILogger<RabbitMqListener> logger,
             IServiceScopeFactory scopeFactory,
-            IConfiguration configuration)
+            string queueName,
+            string exchangeName = "",
+            string routingKey = "")
         {
+            _channel = channel;
             _logger = logger;
             _scopeFactory = scopeFactory;
-            _configuration = configuration;
+            _queueName = queueName;
+            _exchangeName = exchangeName;
+            _routingKey = routingKey;
+
+            Initialize();
         }
 
-        public void Start()
+        private void Initialize()
         {
+            _channel.QueueBind(
+                queue: _queueName,
+                exchange: _exchangeName,
+                routingKey: _routingKey);
+
+            _channel.BasicQos(0, 1, false);
+        }
+
+        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            stoppingToken.Register(() =>
+                _logger.LogInformation("Listener for {QueueName} is stopping", _queueName));
+
+            var consumer = new AsyncEventingBasicConsumer(_channel);
+            consumer.Received += ProcessMessageAsync;
+
+            _channel.BasicConsume(_queueName, false, consumer);
+            return Task.CompletedTask;
+        }
+
+        private async Task ProcessMessageAsync(object sender, BasicDeliverEventArgs ea)
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var serviceProvider = scope.ServiceProvider;
+
             try
             {
-                var factory = new ConnectionFactory()
-                {
-                    HostName = _configuration["RabbitMQ:HostName"],
-                    UserName = _configuration["RabbitMQ:UserName"],
-                    Password = _configuration["RabbitMQ:Password"],
-                    DispatchConsumersAsync = true,
-                    AutomaticRecoveryEnabled = true,
-                    NetworkRecoveryInterval = TimeSpan.FromSeconds(10),
-                    RequestedConnectionTimeout = TimeSpan.FromSeconds(15)
-                };
+                var body = ea.Body.ToArray();
+                var message = Encoding.UTF8.GetString(body);
 
-                _connection = factory.CreateConnection();
-                _channel = _connection.CreateModel();
+                _logger.LogInformation("Processing message from {QueueName}", _queueName);
 
-                _channel.QueueDeclare(
-                    queue: _queueName,
-                    durable: true,
-                    exclusive: false,
-                    autoDelete: false,
-                    arguments: null
-                );
+                // Implementar lógica específica do consumidor via DI
+                var handler = serviceProvider.GetRequiredService<IMessageHandler>();
+                await handler.HandleAsync(message);
 
-                _consumer = new EventingBasicConsumer(_channel);
-                _consumer.Received += (model, ea) =>
-                {
-                    // Aqui dentro, criamos um "escopo" para cada mensagem:
-                    using var scope = _scopeFactory.CreateScope();
-
-                    try
-                    {
-                        var body = ea.Body.ToArray();
-                        var message = Encoding.UTF8.GetString(body);
-
-                        _logger.LogInformation($"[RabbitMqListener] Mensagem recebida: {message}");
-
-                        // Recupera o DbContext ou o repositório a partir do escopo
-                        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
-                        // Faça o que for necessário:
-                        // dbContext.Videos.Add(...);
-                        // dbContext.SaveChanges();
-
-                        // Confirma que processou
-                        _channel.BasicAck(ea.DeliveryTag, multiple: false);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "[RabbitMqListener] Erro ao processar a mensagem.");
-                        // Em caso de erro, você pode dar BasicNack com requeue ou descartar
-                        //_channel.BasicNack(ea.DeliveryTag, false, true);
-                    }
-                };
-
-                // Inicia o consumo
-                _channel.BasicConsume(
-                    queue: _queueName,
-                    autoAck: false, // false para controlar manualmente
-                    consumer: _consumer
-                );
-
-                _logger.LogInformation("[RabbitMqListener] Iniciado. Escutando a fila...");
+                _channel.BasicAck(ea.DeliveryTag, false);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[RabbitMqListener] Falha ao iniciar.");
+                _logger.LogError(ex, "Error processing message from {QueueName}", _queueName);
+                _channel.BasicNack(ea.DeliveryTag, false, false);
             }
         }
+    }
 
-        public void Stop()
-        {
-            _logger.LogInformation("[RabbitMqListener] Parando...");
-
-            _channel?.Close();
-            _connection?.Close();
-
-            _logger.LogInformation("[RabbitMqListener] Parado.");
-        }
+    public interface IMessageHandler
+    {
+        Task HandleAsync(string message);
     }
 }
