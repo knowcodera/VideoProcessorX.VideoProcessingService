@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using System.Text;
 using System.Text.Json;
 using VideoProcessingService.Domain.Entities;
 using VideoProcessingService.Infrastructure.Data;
@@ -15,17 +16,14 @@ namespace VideoProcessingService.Infrastructure.Messaging
         private readonly IModel _channel;
         private readonly ILogger<UserEventsConsumer> _logger;
         private readonly IServiceScopeFactory _scopeFactory;
-        private const string QueueName = "user.events";
 
-        public UserEventsConsumer(
-            ILogger<UserEventsConsumer> logger,
-            IServiceScopeFactory scopeFactory,
-            IModel channel)
+        public UserEventsConsumer(IModel channel,
+                                  ILogger<UserEventsConsumer> logger,
+                                  IServiceScopeFactory scopeFactory)
         {
-
+            _channel = channel;
             _logger = logger;
             _scopeFactory = scopeFactory;
-            _channel = channel;
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -33,31 +31,30 @@ namespace VideoProcessingService.Infrastructure.Messaging
             var consumer = new AsyncEventingBasicConsumer(_channel);
             consumer.Received += ProcessMessageAsync;
 
-            _channel.BasicConsume(
-                queue: "user.events",
-                autoAck: false,
-                consumer: consumer
-            );
+            // Consumir da fila user.events
+            _channel.BasicConsume("user.events", autoAck: false, consumer: consumer);
 
             return Task.CompletedTask;
         }
 
-        private async Task ProcessMessageAsync(object sender, BasicDeliverEventArgs ea)
+        private async Task ProcessMessageAsync(object sender, BasicDeliverEventArgs e)
         {
             using var scope = _scopeFactory.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>(); 
-            var channel = scope.ServiceProvider.GetRequiredService<IModel>();
-
             try
             {
-                var body = ea.Body.ToArray();
-                var message = JsonSerializer.Deserialize<UserCreatedMessage>(body);
+                var body = e.Body.ToArray();
+                var messageJson = Encoding.UTF8.GetString(body);
 
-                _logger.LogInformation("Processing user event: {UserId}", message.Id);
+                _logger.LogInformation("UserEventsConsumer RECEIVED BODY: {messageJson}", messageJson);
 
-                var existingUser = await dbContext.Users
-                    .FirstOrDefaultAsync(u => u.Id == message.Id);
+                // Deserializar
+                var message = JsonSerializer.Deserialize<UserCreatedMessage>(messageJson);
 
+                _logger.LogInformation("Processing user event: {UserId} - {Email}", message.Id, message.Email);
+
+                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+                var existingUser = await dbContext.Users.FindAsync(message.Id);
                 if (existingUser != null)
                 {
                     existingUser.Email = message.Email;
@@ -66,6 +63,10 @@ namespace VideoProcessingService.Infrastructure.Messaging
                 }
                 else
                 {
+                    // Importante: Se a PK "Id" for gerada pela AuthService e não for identity
+                    // você precisa configurar ValueGeneratedNever() no seu OnModelCreating:
+                    // modelBuilder.Entity<User>().Property(u => u.Id).ValueGeneratedNever();
+
                     var newUser = new User
                     {
                         Id = message.Id,
@@ -76,12 +77,15 @@ namespace VideoProcessingService.Infrastructure.Messaging
                 }
 
                 await dbContext.SaveChangesAsync();
-                channel.BasicAck(ea.DeliveryTag, false);
+
+                // Ack da mensagem
+                _channel.BasicAck(e.DeliveryTag, multiple: false);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error processing user event");
-                channel.BasicNack(ea.DeliveryTag, false, false);
+                // NACK sem requeue para não cair em loop infinito
+                _channel.BasicNack(e.DeliveryTag, multiple: false, requeue: false);
             }
         }
     }
@@ -92,4 +96,5 @@ namespace VideoProcessingService.Infrastructure.Messaging
         public string Email { get; set; }
         public string Username { get; set; }
     }
+
 }

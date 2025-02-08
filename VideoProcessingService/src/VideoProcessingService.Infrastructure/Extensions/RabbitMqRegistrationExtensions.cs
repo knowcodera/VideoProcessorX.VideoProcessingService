@@ -78,9 +78,8 @@ namespace VideoProcessingService.Infrastructure.Extensions
                 channel.QueueBind("video.process", "video_exchange", "video.process");
                 channel.QueueBind("dead_letter.video.process", "dlx.video.process", "");
 
-                // Se quiser consumir user.created, declare e bind "user_exchange"
-                // (caso esse exchange não seja declarado por outro serviço)
-                channel.ExchangeDeclare("user_exchange", ExchangeType.Direct, true, false);
+
+                channel.ExchangeDeclare("user_exchange", ExchangeType.Direct, durable: true, autoDelete: false);
                 channel.QueueDeclare("user.events", durable: true, exclusive: false, autoDelete: false);
                 channel.QueueBind("user.events", "user_exchange", "user.created");
 

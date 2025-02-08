@@ -24,4 +24,8 @@
     <ProjectReference Include="..\VideoProcessingService.Domain\VideoProcessingService.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 </Project>

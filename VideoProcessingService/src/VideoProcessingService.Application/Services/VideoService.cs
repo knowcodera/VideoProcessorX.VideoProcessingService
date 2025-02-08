@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using System.IO.Compression;
+using System.Runtime.InteropServices;
 using VideoProcessingService.Application.Interfaces;
 using Xabe.FFmpeg;
 
@@ -19,8 +20,19 @@ namespace VideoProcessingService.Application.Services
             _environment = environment;
             _logger = logger;
 
-            // Configuração do FFmpeg
-            FFmpeg.SetExecutablesPath(_environment.ContentRootPath);
+            ConfigureFfmpegPath();
+        }
+
+        private void ConfigureFfmpegPath()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                FFmpeg.SetExecutablesPath(_environment.ContentRootPath);
+            }
+            else
+            {
+                FFmpeg.SetExecutablesPath("/usr/bin");
+            }
         }
 
         public async Task<string> GenerateFramesZipAsync(string videoPath, int videoId)

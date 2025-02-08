@@ -14,8 +14,10 @@ namespace VideoProcessingService.Infrastructure.Data
                 .WithMany()
                 .HasForeignKey(v => v.UserId);
 
-            modelBuilder.Entity<User>()
-                .HasKey(u => u.Id);
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.Property(u => u.Id).ValueGeneratedNever();
+            });
         }
 
         public DbSet<Video> Videos { get; set; }

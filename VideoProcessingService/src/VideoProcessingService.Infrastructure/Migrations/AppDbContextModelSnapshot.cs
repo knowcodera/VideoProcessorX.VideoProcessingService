@@ -25,10 +25,7 @@ namespace VideoProcessingService.Infrastructure.Migrations
             modelBuilder.Entity("VideoProcessingService.Domain.Entities.User", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Email")
                         .IsRequired()

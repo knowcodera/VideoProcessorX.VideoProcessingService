@@ -7,7 +7,6 @@ using Microsoft.Extensions.Options;
 using Polly;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using System;
 using System.Text.Json;
 using VideoProcessingService.Application.DTOs;
 using VideoProcessingService.Application.Interfaces;
@@ -44,7 +43,6 @@ namespace VideoProcessingService.Infrastructure.Messaging
             var consumer = new AsyncEventingBasicConsumer(_channel);
             consumer.Received += ProcessMessageAsync;
 
-            // Consumir da fila "video.process"
             _channel.BasicConsume(
                 queue: "video.process",
                 autoAck: false,
@@ -87,9 +85,20 @@ namespace VideoProcessingService.Infrastructure.Messaging
 
                     if (video?.Status != "PENDING") return;
 
-                    // Atualizar status para PROCESSING
                     video.Status = "PROCESSING";
                     await dbContext.SaveChangesAsync();
+
+                    if (video.User != null)
+                    {
+                        await messageQueue.PublishAsync("notification.events", new NotificationMessageDto
+                        {
+                            Email = video.User.Email,
+                            Subject = "Processamento iniciado",
+                            Body = $"Seu vídeo '{video.OriginalFileName}' está sendo processado.",
+                            AttachmentPath = null,
+                            IsProcessingUpdate = true
+                        });
+                    }
 
                     // Processar vídeo
                     var zipPath = await videoService.GenerateFramesZipAsync(video.FilePath, video.Id);
@@ -100,14 +109,26 @@ namespace VideoProcessingService.Infrastructure.Messaging
                     video.ProcessedAt = DateTime.UtcNow;
                     await dbContext.SaveChangesAsync();
 
-                    // Enviar notificação
+                    //// Enviar notificação
+                    //if (video.User != null)
+                    //{
+                    //    await messageQueue.PublishAsync("notification.events", new NotificationMessageDto
+                    //    {
+                    //        Email = video.User.Email,
+                    //        Subject = "Seu vídeo está pronto!",
+                    //        Body = $"Download disponível: {GenerateDownloadLink(video.Id)}"
+                    //    });
+                    //}
+
                     if (video.User != null)
                     {
-                        await messageQueue.PublishAsync("notification", new NotificationMessageDto
+                        await messageQueue.PublishAsync("notification.events", new NotificationMessageDto
                         {
                             Email = video.User.Email,
                             Subject = "Seu vídeo está pronto!",
-                            Body = $"Download disponível: {GenerateDownloadLink(video.Id)}"
+                            Body = $"Olá, em anexo está seu ZIP contendo os frames do vídeo '{video.OriginalFileName}'",
+                            AttachmentPath = zipPath,
+                            IsProcessingUpdate = false
                         });
                     }
 

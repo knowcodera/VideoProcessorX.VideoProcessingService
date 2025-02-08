@@ -23,7 +23,10 @@ builder.Services.AddHostedService<VideoProcessingWorker>();
 builder.Services.AddHostedService<UserEventsConsumer>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        sqlServerOptions => sqlServerOptions.EnableRetryOnFailure()
+    ));
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var secretKey = jwtSettings["Key"];
@@ -60,7 +63,6 @@ builder.Services.AddControllers();
 
 builder.Services.Configure<FormOptions>(options =>
 {
-    // Exemplo: 500 MB (em bytes)
     options.MultipartBodyLengthLimit = 500L * 1024L * 1024L;
 });
 
@@ -75,7 +77,6 @@ builder.Services.AddSwaggerGen(c =>
         Version = "v1"
     });
 
-    // 1) Definir como o Swagger interpretará o esquema de segurança
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "JWT Authorization header using the Bearer scheme. Ex: \"Authorization: Bearer {token}\"",
@@ -85,7 +86,6 @@ builder.Services.AddSwaggerGen(c =>
         Scheme = "Bearer"
     });
 
-    // 2) Exigir que todas as operações estejam protegidas por esse esquema
     c.AddSecurityRequirement(new OpenApiSecurityRequirement{
     {
         new OpenApiSecurityScheme {
@@ -100,6 +100,12 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    dbContext.Database.Migrate();
+}
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>
