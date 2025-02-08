@@ -4,6 +4,8 @@ using Microsoft.Extensions.Logging;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
 using VideoProcessingService.Application.Interfaces;
+using VideoProcessingService.Domain.Entities;
+using VideoProcessingService.Domain.Interfaces;
 using Xabe.FFmpeg;
 
 namespace VideoProcessingService.Application.Services
@@ -12,15 +14,18 @@ namespace VideoProcessingService.Application.Services
     {
         private readonly IWebHostEnvironment _environment;
         private readonly ILogger<VideoService> _logger;
+        private readonly IVideoRepository _videoRepository;
 
         public VideoService(
             IWebHostEnvironment environment,
-            ILogger<VideoService> logger)
+            ILogger<VideoService> logger,
+            IVideoRepository videoRepository)
         {
             _environment = environment;
             _logger = logger;
 
             ConfigureFfmpegPath();
+            _videoRepository = videoRepository;
         }
 
         private void ConfigureFfmpegPath()
@@ -34,7 +39,6 @@ namespace VideoProcessingService.Application.Services
                 FFmpeg.SetExecutablesPath("/usr/bin");
             }
         }
-
         public async Task<string> GenerateFramesZipAsync(string videoPath, int videoId)
         {
             _logger.LogInformation($"Iniciando processamento do vídeo {videoId}");
@@ -119,5 +123,10 @@ namespace VideoProcessingService.Application.Services
                 }
             }
         }
+        public async Task<IEnumerable<object>> GetUserVideosAsync(int userId)
+        {
+            return await _videoRepository.GetVideosByUserIdAsync(userId);
+        }
     }
+}
 }

@@ -1,5 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+﻿using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -7,7 +7,6 @@ using Microsoft.Extensions.Options;
 using Polly;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using System.Text.Json;
 using VideoProcessingService.Application.DTOs;
 using VideoProcessingService.Application.Interfaces;
 using VideoProcessingService.Infrastructure.Configuration;
@@ -20,20 +19,17 @@ namespace VideoProcessingService.Infrastructure.Messaging
         private readonly IModel _channel;
         private readonly ILogger<VideoProcessingWorker> _logger;
         private readonly IServiceScopeFactory _scopeFactory;
-        private readonly IConfiguration _configuration;
         private readonly ResiliencePolicyConfig _resilienceConfig;
 
         public VideoProcessingWorker(
 
             ILogger<VideoProcessingWorker> logger,
             IServiceScopeFactory scopeFactory,
-            IConfiguration configuration,
             IOptions<ResiliencePolicyConfig> resilienceConfig,
             IModel channel)
         {
             _logger = logger;
             _scopeFactory = scopeFactory;
-            _configuration = configuration;
             _resilienceConfig = resilienceConfig.Value;
             _channel = channel;
         }
@@ -100,25 +96,13 @@ namespace VideoProcessingService.Infrastructure.Messaging
                         });
                     }
 
-                    // Processar vídeo
                     var zipPath = await videoService.GenerateFramesZipAsync(video.FilePath, video.Id);
 
-                    // Atualizar status para COMPLETED
                     video.Status = "COMPLETED";
                     video.ZipPath = zipPath;
                     video.ProcessedAt = DateTime.UtcNow;
                     await dbContext.SaveChangesAsync();
 
-                    //// Enviar notificação
-                    //if (video.User != null)
-                    //{
-                    //    await messageQueue.PublishAsync("notification.events", new NotificationMessageDto
-                    //    {
-                    //        Email = video.User.Email,
-                    //        Subject = "Seu vídeo está pronto!",
-                    //        Body = $"Download disponível: {GenerateDownloadLink(video.Id)}"
-                    //    });
-                    //}
 
                     if (video.User != null)
                     {
@@ -140,11 +124,6 @@ namespace VideoProcessingService.Infrastructure.Messaging
                 _logger.LogError(ex, "Failed to process video after {Retries} retries", _resilienceConfig.RetryCount);
                 channel.BasicNack(ea.DeliveryTag, false, false);
             }
-        }
-
-        private string GenerateDownloadLink(int videoId)
-        {
-            return $"{_configuration["BaseUrl"]}/api/videos/download/{videoId}";
         }
     }
 

@@ -1,0 +1,73 @@
+# Indica que este é o arquivo raiz do EditorConfig
+root = true
+
+# 🔹 Regras para todos os arquivos C#
+[*.cs]
+
+# 🔥 Organização dos 'usings'
+dotnet_sort_system_directives_first = true
+csharp_using_directive_placement = inside_namespace
+
+# 🔥 Identação e formatação
+indent_style = space
+indent_size = 4
+tab_width = 4
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+# 🔥 Preferências de tipos (var vs. tipo explícito)
+dotnet_style_var_for_built_in_types = true:suggestion  # Usa var para tipos básicos
+dotnet_style_var_elsewhere = true:suggestion  # Usa var para qualquer tipo
+dotnet_style_prefer_foreach_over_for = true:suggestion  # Prefere foreach ao invés de for quando aplicável
+
+# 🔥 Removendo código redundante
+csharp_style_unused_value_expression_statement_preference = discard_variable:suggestion
+csharp_style_unused_value_assignment_preference = unused_local_variable:suggestion
+csharp_remove_unnecessary_braces = true:suggestion
+
+# 🔥 Melhorando a legibilidade
+csharp_prefer_simple_default_expression = true:suggestion
+csharp_prefer_braces = when_multiline:error  # Força chaves em blocos multiline
+csharp_style_expression_bodied_methods = when_possible:suggestion
+csharp_style_expression_bodied_constructors = when_possible:suggestion
+csharp_style_expression_bodied_properties = when_possible:suggestion
+csharp_style_expression_bodied_indexers = when_possible:suggestion
+csharp_style_expression_bodied_accessors = when_possible:suggestion
+
+# 🔥 Uso de padrões modernos do C#
+csharp_style_pattern_matching_over_as_with_null_check = true:suggestion
+csharp_style_pattern_matching_over_is_with_cast_check = true:suggestion
+csharp_style_prefer_switch_expression = true:suggestion  # Prefere switch expressions modernas
+csharp_style_deconstructed_variable_declaration = true:suggestion
+
+# 🔥 Convenções de código
+dotnet_style_qualification_for_field = false  # Não usar "this." em campos
+dotnet_style_qualification_for_property = false  # Não usar "this." em propriedades
+dotnet_style_qualification_for_method = false  # Não usar "this." em métodos
+dotnet_style_qualification_for_event = false  # Não usar "this." em eventos
+
+# 🔥 Inicializadores e melhorias de sintaxe
+dotnet_style_object_initializer = true:suggestion  # Prefere inicializadores de objeto
+dotnet_style_collection_initializer = true:suggestion  # Prefere inicializadores de coleção
+dotnet_style_prefer_auto_properties = true:suggestion  # Prefere propriedades automáticas ao invés de campos privados
+
+# 🔥 Melhorias no uso de null
+dotnet_style_prefer_is_null_check_over_reference_equality = true:suggestion  # Prefere "is null" em vez de "== null"
+dotnet_style_prefer_throw_expression = true:suggestion  # Prefere "?? throw" em vez de if-null
+
+# 🔥 Boas práticas com async/await
+dotnet_style_prefer_inferred_tuple_names = true:suggestion
+dotnet_style_prefer_inferred_anonymous_type_member_names = true:suggestion
+dotnet_style_require_accessibility_modifiers = always:error  # Sempre exigir modificadores de acesso
+csharp_style_prefer_async_lambda = true:suggestion  # Prefere async lambdas quando possível
+csharp_style_null_propagation = true:suggestion  # Usa operador de propagação null "?"
+
+# 🔥 Segurança e performance
+csharp_prefer_static_local_function = true:suggestion  # Prefere funções locais estáticas sempre que possível
+csharp_style_prefer_readonly_struct = true:suggestion  # Usa "readonly struct" para evitar mutabilidade desnecessária
+dotnet_style_prefer_compound_assignments = true:suggestion  # Prefere +=, -=, etc.
+dotnet_style_prefer_simplified_boolean_expressions = true:suggestion  # Remove redundâncias em booleanos
+
+# 🔥 Tratamento de código legado
+dotnet_style_allow_multiple_blank_lines = false  # Remove múltiplas linhas em branco
+dotnet_style_allow_statement_immediately_after_block = false  # Garante linhas entre blocos de código

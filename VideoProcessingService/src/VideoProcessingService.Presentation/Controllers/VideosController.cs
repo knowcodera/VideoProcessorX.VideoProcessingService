@@ -15,13 +15,13 @@ namespace VideoProcessorX.WebApi.Controllers
         private readonly AppDbContext _context;
         private readonly IWebHostEnvironment _env;
         private readonly IVideoService _videoService;
-        private readonly IMessageQueue _messageQueue; // Novo campo
+        private readonly IMessageQueue _messageQueue;
 
         public VideosController(
             AppDbContext context,
             IWebHostEnvironment env,
             IVideoService videoService,
-            IMessageQueue messageQueue) // Injeção do IMessageQueue
+            IMessageQueue messageQueue) 
         {
             _context = context;
             _env = env;
@@ -34,21 +34,7 @@ namespace VideoProcessorX.WebApi.Controllers
         public async Task<IActionResult> GetUserVideos()
         {
             var userId = int.Parse(User.Claims.First(c => c.Type == "sub").Value);
-
-            var videos = await _context.Videos
-                .Where(v => v.UserId == userId)
-                .OrderByDescending(v => v.CreatedAt)
-                .Select(v => new
-                {
-                    v.Id,
-                    v.OriginalFileName,
-                    v.Status,
-                    v.ZipPath,
-                    v.CreatedAt,
-                    v.ProcessedAt
-                })
-                .ToListAsync();
-
+            var videos = await _videoService.GetUserVideosAsync(userId);
             return Ok(videos);
         }
 
