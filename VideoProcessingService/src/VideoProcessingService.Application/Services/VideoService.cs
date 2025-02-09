@@ -1,10 +1,9 @@
-﻿using FFMpegCore;
+﻿using System.IO.Compression;
+using System.Runtime.InteropServices;
+using FFMpegCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
-using System.IO.Compression;
-using System.Runtime.InteropServices;
 using VideoProcessingService.Application.Interfaces;
-using VideoProcessingService.Domain.Entities;
 using VideoProcessingService.Domain.Interfaces;
 using Xabe.FFmpeg;
 
@@ -123,10 +122,9 @@ namespace VideoProcessingService.Application.Services
                 }
             }
         }
-        public async Task<IEnumerable<object>> GetUserVideosAsync(int userId)
+        public async Task<IEnumerable<Object>> GetUserVideosAsync(int userId)
         {
             return await _videoRepository.GetVideosByUserIdAsync(userId);
         }
     }
-}
 }

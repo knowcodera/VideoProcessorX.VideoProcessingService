@@ -49,7 +49,7 @@ Desktop.ini
 # Recycle Bin used on file shares
 $RECYCLE.BIN/
 
-# NUGET
+# NuGet
 *.nupkg
 # The packages folder can be ignored because of NuGet restore
 **/packages/*
@@ -107,7 +107,7 @@ $RECYCLE.BIN/
 .idea/
 *.sln.iml
 
-# Others
+# Outros arquivos de build
 **/bin/
 **/obj/
 
@@ -130,3 +130,6 @@ store/.vs/**
 # Copilot Indices (caso esteja ativado)
 **/CopilotIndices/
 
+# SonarQube
+.sonarqube/
+run-sonarqube.ps1

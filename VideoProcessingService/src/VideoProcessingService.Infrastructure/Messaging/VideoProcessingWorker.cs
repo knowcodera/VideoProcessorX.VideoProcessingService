@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -9,6 +10,7 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using VideoProcessingService.Application.DTOs;
 using VideoProcessingService.Application.Interfaces;
+using VideoProcessingService.Domain.Entities;
 using VideoProcessingService.Infrastructure.Configuration;
 using VideoProcessingService.Infrastructure.Data;
 
@@ -36,6 +38,8 @@ namespace VideoProcessingService.Infrastructure.Messaging
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            _channel.BasicQos(prefetchSize: 0, prefetchCount: (ushort)(Environment.ProcessorCount * 2), global: false);
+
             var consumer = new AsyncEventingBasicConsumer(_channel);
             consumer.Received += ProcessMessageAsync;
 
@@ -50,6 +54,7 @@ namespace VideoProcessingService.Infrastructure.Messaging
 
         private async Task ProcessMessageAsync(object sender, BasicDeliverEventArgs ea)
         {
+            Video? video = null;
             using var scope = _scopeFactory.CreateScope();
             var services = scope.ServiceProvider;
             var channel = scope.ServiceProvider.GetRequiredService<IModel>();
@@ -75,7 +80,7 @@ namespace VideoProcessingService.Infrastructure.Messaging
 
                     _logger.LogInformation("Processing video ID: {VideoId}", message.VideoId);
 
-                    var video = await dbContext.Videos
+                    video = await dbContext.Videos
                         .Include(v => v.User)
                         .FirstOrDefaultAsync(v => v.Id == message.VideoId);
 
@@ -122,6 +127,23 @@ namespace VideoProcessingService.Infrastructure.Messaging
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to process video after {Retries} retries", _resilienceConfig.RetryCount);
+
+                if (video?.User != null && !string.IsNullOrEmpty(video.User.Email))
+                {
+                    await messageQueue.PublishAsync("notification.events", new NotificationMessageDto
+                    {
+                        Email = video.User.Email,
+                        Subject = "Erro no processamento do vídeo",
+                        Body = $"O processamento do vídeo '{video.OriginalFileName}' falhou. Detalhes: {ex.Message}",
+                        AttachmentPath = null,
+                        IsProcessingUpdate = false
+                    });
+                }
+                else
+                {
+                    _logger.LogWarning("Não foi possível notificar o usuário sobre o erro. Video ou usuário não encontrado.");
+                }
+
                 channel.BasicNack(ea.DeliveryTag, false, false);
             }
         }
