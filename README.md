@@ -1,7 +1,7 @@
-# VideoProcessorX.VideoProcessingService
+# VideoProcessingService
 
 ## 📚 Visão Geral  
-O **VideoProcessorX.VideoProcessingService** é um microserviço desenvolvido em **.NET 8** para processamento de vídeos, extração de frames e geração de arquivos ZIP. Ele opera de forma assíncrona e escalável, utilizando **RabbitMQ** para mensageria e **FFmpeg** para manipulação de mídia.  
+O **VideoProcessingService** é um microserviço desenvolvido em **.NET 8** para processamento de vídeos, extração de frames e geração de arquivos ZIP. Ele opera de forma assíncrona e escalável, utilizando **RabbitMQ** para mensageria e **FFmpeg** para manipulação de mídia.  
 
 ## 🚀 Tecnologias Utilizadas  
 - **.NET 8** – Plataforma de desenvolvimento  
@@ -56,11 +56,6 @@ Certifique-se de ter instalado:
 - [RabbitMQ](https://www.rabbitmq.com/download.html)  
 - [FFmpeg](https://ffmpeg.org/download.html)  
 
-### 2️⃣ **Clonar o Repositório**  
-```bash
-git clone https://github.com/seu-usuario/VideoProcessorX.VideoProcessingService.git
-cd VideoProcessorX.VideoProcessingService
-```
 
 ### 3️⃣ **Configurar Variáveis de Ambiente**  
 Crie um arquivo **appsettings.json** no diretório `VideoProcessingService.Presentation` com o seguinte conteúdo:  
