@@ -1,6 +1,0 @@
-@VideoProcessorX_HostAddress = http://localhost:5287
-
-GET {{VideoProcessorX_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

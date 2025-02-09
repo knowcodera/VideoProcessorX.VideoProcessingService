@@ -1,12 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using VideoProcessingService.Application.Interfaces;
 using VideoProcessingService.Domain.Entities;
 using VideoProcessingService.Infrastructure.Data;
 using VideoProcessingService.Presentation.DTOs.Video;
 
-namespace VideoProcessorX.WebApi.Controllers
+namespace VideoProcessingService.WebApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
