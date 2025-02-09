@@ -7,6 +7,6 @@ namespace VideoProcessingService.Domain.Interfaces
         Task<Video> GetByIdAsync(int videoId);
         Task CreateAsync(Video video);
         Task UpdateAsync(Video video);
-        Task<IEnumerable<Video>> GetVideosByUserIdAsync(int userId);
+        Task<IEnumerable<Object>> GetVideosByUserIdAsync(int userId);
     }
 }

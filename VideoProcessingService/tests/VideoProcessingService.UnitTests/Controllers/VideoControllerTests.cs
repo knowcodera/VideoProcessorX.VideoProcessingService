@@ -6,7 +6,7 @@ using Moq;
 using VideoProcessingService.Application.Interfaces;
 using VideoProcessingService.Infrastructure.Data;
 using VideoProcessingService.Presentation.DTOs.Video;
-using VideoProcessorX.WebApi.Controllers;
+using VideoProcessingService.WebApi.Controllers;
 
 namespace VideoProcessingService.UnitTests.Controllers
 {

@@ -30,7 +30,7 @@ namespace VideoProcessingService.Infrastructure.Persistence
             _context.Videos.Update(video);
             await _context.SaveChangesAsync();
         }
-        public async Task<IEnumerable<object>> GetVideosByUserIdAsync(int userId)
+        public async Task<IEnumerable<Object>> GetVideosByUserIdAsync(int userId)
         {
             return await _context.Videos
                 .Where(v => v.UserId == userId)

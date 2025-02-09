@@ -5,9 +5,11 @@ services:
     build:
       context: ./VideoProcessingService
       dockerfile: Dockerfile
+    deploy:
+      replicas: 3 
     container_name: video-processing-service
     environment:
-      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=VideoDB;User Id=sa;Password=StrongPassword123;TrustServerCertificate=True
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=VideoDB;User Id=sa;Password=StrongPassword123!;TrustServerCertificate=True
       - RabbitMQ__HostName=rabbitmq
       - RabbitMQ__Port=5672
       - RabbitMQ__Username=guest
