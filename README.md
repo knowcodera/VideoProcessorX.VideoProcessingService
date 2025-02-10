@@ -3,6 +3,16 @@
 ## 📚 Visão Geral  
 O **VideoProcessingService** é um microserviço desenvolvido em **.NET 8** para processamento de vídeos, extração de frames e geração de arquivos ZIP. Ele opera de forma assíncrona e escalável, utilizando **RabbitMQ** para mensageria e **FFmpeg** para manipulação de mídia.  
 
+## 📐 Arquitetura
+[Acesse os detalhes da arquitetura](arquitetura.md)
+
+
+## Video
+- Fase 2 - https://youtu.be/JMTzKb7VZ8Q
+- Fase 3 - https://youtu.be/M7PkOcWpImw
+- Fase 4 - https://youtu.be/H0XOs21J01o
+- Hackaton -
+
 ## 🚀 Tecnologias Utilizadas  
 - **.NET 8** – Plataforma de desenvolvimento  
 - **ASP.NET Core Web API** – Backend da API  
@@ -101,22 +111,15 @@ docker-compose up -d
 | `GET`  | `/api/videos`           | Retorna os vídeos do usuário autenticado      |
 | `GET`  | `/api/videos/download/{id}` | Baixa o arquivo ZIP com os frames extraídos |
 
-### ⚡ **Saúde da Aplicação**  
-| Método | Rota            | Descrição                        |
-|--------|----------------|--------------------------------|
-| `GET`  | `/api/health`  | Verifica se a API está online |
-
 ## 🤖 **Cobertura de Testes**  
-O projeto possui **testes unitários e de integração** cobrindo **80% do código**.  
-Os testes incluem:  
-✔ Testes de serviços de vídeo (extração de frames)  
-✔ Testes de mensageria com RabbitMQ  
-✔ Testes de repositórios com banco de dados em memória  
 
-Para executar os testes, utilize:  
-```bash
-dotnet test
-```
+| Pacote                                      | Cobertura de Linhas | Cobertura de Branches |
+|---------------------------------------------|---------------------|-----------------------|
+| `VideoProcessingService.Application`       | 33.75%              | 44.44%                |
+| `VideoProcessingService.Domain`            | 27.27%              | 100%                  |
+| `VideoProcessingService.Infrastructure`    | 7.81%               | 0%                    |
+| `VideoProcessingService.Presentation`      | 0%                  | 0%                    |
+
 
 ## 📜 Licença
 Este projeto está sob a licença **MIT**.
