@@ -11,6 +11,8 @@
         public string Status { get; set; }
         public string ZipPath { get; set; }
 
+        public string FileHash { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? ProcessedAt { get; set; }
     }

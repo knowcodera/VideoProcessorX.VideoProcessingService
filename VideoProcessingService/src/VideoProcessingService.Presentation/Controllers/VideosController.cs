@@ -1,8 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using VideoProcessingService.Application.Interfaces;
 using VideoProcessingService.Domain.Entities;
+using VideoProcessingService.Domain.Interfaces;
 using VideoProcessingService.Infrastructure.Data;
+using VideoProcessingService.Infrastructure.Messaging;
 using VideoProcessingService.Presentation.DTOs.Video;
 
 namespace VideoProcessingService.WebApi.Controllers
@@ -15,17 +18,23 @@ namespace VideoProcessingService.WebApi.Controllers
         private readonly IWebHostEnvironment _env;
         private readonly IVideoService _videoService;
         private readonly IMessageQueue _messageQueue;
+        private readonly IFileStorageService _fileStorageService;
+        private readonly IVideoRepository _videoRepository;
 
         public VideosController(
             AppDbContext context,
             IWebHostEnvironment env,
             IVideoService videoService,
-            IMessageQueue messageQueue) 
+            IMessageQueue messageQueue,
+            IFileStorageService fileStorageService,
+            IVideoRepository videoRepository)
         {
             _context = context;
             _env = env;
             _videoService = videoService;
             _messageQueue = messageQueue;
+            _fileStorageService = fileStorageService;
+            _videoRepository = videoRepository;
         }
 
         [HttpGet]
@@ -48,30 +57,33 @@ namespace VideoProcessingService.WebApi.Controllers
             if (dto.File == null || dto.File.Length == 0)
                 return BadRequest("Nenhum arquivo enviado.");
 
-            var uploadsFolder = Path.Combine(_env.ContentRootPath, "uploads");
-            if (!Directory.Exists(uploadsFolder))
-                Directory.CreateDirectory(uploadsFolder);
+            var fileHash = await _fileStorageService.ComputeFileHashAsync(dto.File);
+            var existingVideo = await _videoRepository.GetByUserAndHashAsync(userId, fileHash);
 
-            var uniqueFileName = $"{Guid.NewGuid()}_{dto.File.FileName}";
-            var fullPath = Path.Combine(uploadsFolder, uniqueFileName);
-
-            try
+            string blobUrl;
+            if (existingVideo != null)
             {
-                using (var stream = new FileStream(fullPath, FileMode.Create))
-                {
-                    await dto.File.CopyToAsync(stream);
-                }
+                blobUrl = existingVideo.FilePath;
             }
-            catch (Exception ex)
+            else
             {
-                return StatusCode(500, $"Erro ao salvar o arquivo: {ex.Message}");
+                var uniqueFileName = $"{Guid.NewGuid()}_{dto.File.FileName}";
+                try
+                {
+                    blobUrl = await _fileStorageService.UploadFileAsync(dto.File, uniqueFileName);
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(500, $"Erro ao enviar para Blob Storage: {ex.Message}");
+                }
             }
 
             var video = new Video
             {
                 UserId = userId,
                 OriginalFileName = dto.File.FileName,
-                FilePath = fullPath,
+                FilePath = blobUrl,
+                FileHash = fileHash,
                 Status = "PENDING",
                 ZipPath = string.Empty,
                 CreatedAt = DateTime.UtcNow
@@ -82,10 +94,7 @@ namespace VideoProcessingService.WebApi.Controllers
 
             try
             {
-                await _messageQueue.PublishAsync("video.process", new
-                {
-                    VideoId = video.Id
-                });
+                await _messageQueue.PublishAsync("video.process", new VideoProcessMessage(video.Id));
 
                 return Ok(new
                 {
@@ -112,11 +121,28 @@ namespace VideoProcessingService.WebApi.Controllers
             if (video == null || video.Status != "COMPLETED")
                 return NotFound("Arquivo não encontrado ou não processado");
 
-            if (!System.IO.File.Exists(video.ZipPath))
-                return NotFound("Arquivo ZIP não encontrado");
+            // Agora o ZipPath guarda a URL do blob
+            if (string.IsNullOrEmpty(video.ZipPath))
+                return NotFound("Arquivo ZIP não encontrado no registro do vídeo.");
 
-            var fileStream = new FileStream(video.ZipPath, FileMode.Open, FileAccess.Read);
-            return File(fileStream, "application/zip", $"{Path.GetFileNameWithoutExtension(video.OriginalFileName)}_frames.zip");
+            // Verifica se o blob existe
+            var exists = await _fileStorageService.FileExistsAsync(video.ZipPath);
+            if (!exists)
+            {
+                return NotFound("Arquivo ZIP não encontrado no Blob Storage.");
+            }
+
+            // Baixar como stream e devolver para o cliente
+            var stream = await _fileStorageService.GetFileStreamAsync(video.ZipPath);
+            if (stream == null)
+            {
+                return NotFound("Não foi possível obter o Stream do Blob Storage.");
+            }
+
+            // Sugerimos um nome para o ZIP
+            var downloadFileName = $"{Path.GetFileNameWithoutExtension(video.OriginalFileName)}_frames.zip";
+
+            return File(stream, "application/zip", downloadFileName);
         }
     }
 }

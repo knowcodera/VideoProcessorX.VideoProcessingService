@@ -1,10 +1,8 @@
 ﻿namespace VideoProcessingService.Application.Interfaces
 {
-    using VideoProcessingService.Domain.Entities;
-
     public interface IVideoService
     {
-        Task<string> GenerateFramesZipAsync(string videoPath, int videoId);
+        Task<string> GenerateFramesZipAsync(string videoBlobUrl, int videoId);
         Task<IEnumerable<Object>> GetUserVideosAsync(int userId);
     }
 }

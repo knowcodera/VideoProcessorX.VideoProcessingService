@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: video-processor-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: video-processor
+  template:
+    metadata:
+      labels:
+        app: video-processor
+    spec:
+      containers:
+      - name: video-processor-container-deployment
+        image: videoprocessingservice-video-processor-service:latest
+        resources:
+          requests:
+            cpu: "250m"  # Solicita 100 milicores
+            memory: "512Mi"
+          limits:
+            cpu: "1000m"  # Limite de 500 milicores
+            memory: "1024Mi"
+        ports:
+          - containerPort: 7070

@@ -19,6 +19,8 @@ builder.Services.AddRabbitMq(builder.Configuration);
 builder.Services.AddScoped<IVideoRepository, VideoRepository>();
 builder.Services.AddScoped<IVideoService, VideoService>();
 
+builder.Services.AddScoped<IFileStorageService, AzureBlobStorageService>();
+
 builder.Services.AddHostedService<VideoProcessingWorker>();
 builder.Services.AddHostedService<UserEventsConsumer>();
 

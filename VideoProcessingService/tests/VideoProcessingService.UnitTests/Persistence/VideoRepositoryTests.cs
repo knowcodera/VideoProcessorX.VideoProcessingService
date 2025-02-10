@@ -5,7 +5,7 @@ using VideoProcessingService.Infrastructure.Persistence;
 
 namespace VideoProcessingService.UnitTests.Persistence
 {
-    public class VideoRepositoryTests
+    public class VideoRepositoryTests : IDisposable
     {
         private readonly AppDbContext _context;
         private readonly VideoRepository _repository;
@@ -13,33 +13,61 @@ namespace VideoProcessingService.UnitTests.Persistence
         public VideoRepositoryTests()
         {
             var options = new DbContextOptionsBuilder<AppDbContext>()
-                .UseInMemoryDatabase(databaseName: "TestDB")
+                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
 
             _context = new AppDbContext(options);
             _repository = new VideoRepository(_context);
+
+            _context.Database.EnsureCreated();
         }
 
         [Fact]
-        public async Task CreateAsync_ShouldAddVideo()
+        public async Task CreateAsync_ShouldAddVideoToDatabase()
         {
-            var video = new Video { Id = 1, OriginalFileName = "test.mp4", FilePath = "path.mp4", Status = "PENDING" };
+            // Arrange
+            var video = new Video
+            {
+                Id = 1,
+                OriginalFileName = "test.mp4",
+                Status = "PENDING"
+            };
+
+            // Act
             await _repository.CreateAsync(video);
-            var result = await _repository.GetByIdAsync(video.Id);
+            var result = await _repository.GetByIdAsync(1);
+
+            // Assert
             Assert.NotNull(result);
+            Assert.Equal("test.mp4", result.OriginalFileName);
         }
 
         [Fact]
-        public async Task UpdateAsync_ShouldModifyVideo()
+        public async Task GetVideosByUserIdAsync_ShouldReturnFilteredVideos()
         {
-            var video = new Video { Id = 1, OriginalFileName = "test.mp4", FilePath = "path.mp4", Status = "PENDING" };
+            // Arrange
+            var userId = 1;
+            var video = new Video
+            {
+                Id = 1,
+                UserId = userId,
+                OriginalFileName = "test.mp4"
+            };
+
             await _repository.CreateAsync(video);
 
-            video.Status = "COMPLETED";
-            await _repository.UpdateAsync(video);
+            // Act
+            var result = await _repository.GetVideosByUserIdAsync(userId);
 
-            var updated = await _repository.GetByIdAsync(video.Id);
-            Assert.Equal("COMPLETED", updated.Status);
+            // Assert
+            Assert.Single(result);
+            Assert.Equal("test.mp4", ((dynamic)result.First()).OriginalFileName);
+        }
+
+        public void Dispose()
+        {
+            _context.Database.EnsureDeleted();
+            _context.Dispose();
         }
     }
 }
