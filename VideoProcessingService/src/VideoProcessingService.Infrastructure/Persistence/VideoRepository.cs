@@ -46,5 +46,12 @@ namespace VideoProcessingService.Infrastructure.Persistence
                 })
                 .ToListAsync();
         }
+
+        public async Task<Video> GetByUserAndHashAsync(int userId, string fileHash)
+        {
+            return await _context.Videos
+                .Where(v => v.UserId == userId && v.FileHash == fileHash)
+                .FirstOrDefaultAsync();
+        }
     }
 }
