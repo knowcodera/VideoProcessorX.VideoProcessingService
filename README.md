@@ -120,6 +120,8 @@ docker-compose up -d
 | `VideoProcessingService.Infrastructure`    | 7.81%               | 0%                    |
 | `VideoProcessingService.Presentation`      | 0%                  | 0%                    |
 
+## 🤖 **Cobertura de Carga**  
+![image](https://github.com/user-attachments/assets/7ec4ebd8-20f8-46d5-ae17-2807d9d8d54c)
 
 ## 📜 Licença
 Este projeto está sob a licença **MIT**.
