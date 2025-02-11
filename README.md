@@ -11,7 +11,7 @@ O **VideoProcessingService** é um microserviço desenvolvido em **.NET 8** para
 - Fase 2 - https://youtu.be/JMTzKb7VZ8Q
 - Fase 3 - https://youtu.be/M7PkOcWpImw
 - Fase 4 - https://youtu.be/H0XOs21J01o
-- Hackaton - https://youtu.be/WgBGd7RdiZs
+- Hackaton - https://youtu.be/WgBGd7RdiZs (Estava muito nervoso, desculpas por repetir tanto as mesmas coisas)
 
 ## 🚀 Tecnologias Utilizadas  
 - **.NET 8** – Plataforma de desenvolvimento  
